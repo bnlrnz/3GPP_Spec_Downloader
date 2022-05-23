@@ -1,6 +1,7 @@
 # 3GPP_Spec_Downloader
 Python script to download 3GPP specs from https://www.3gpp.org/ftp/Specs/archive
 
+```
 usage: spec_downloader.py [-h] (-d DOCUMENT | -s SERIES | -l LIST)
                           [-v MAJOR_VERSION] [-e] [--latest]
 
@@ -23,3 +24,4 @@ options:
   -e, --extract         extracts the downloaded zip archives
   --latest              only latest (or latest major version if given)
                         document version is downloaded
+```

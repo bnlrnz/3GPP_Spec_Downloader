@@ -18,6 +18,8 @@ def delete_file(filename):
 def convert_to_pdf(doc_filename):
     subprocess.call(['soffice', '--headless', '--convert-to', 'pdf:writer_pdf_Export', doc_filename])
 
+    print(f"{doc_filename} converted to pdf")
+
     if purge:
         delete_file(doc_filename)
 

@@ -3,12 +3,34 @@
 import argparse
 import sys
 import os
+import subprocess
 import ftplib as FTP
 import zipfile
 from collections import defaultdict
 
 BASE_ADDRESS = 'www.3gpp.org'
 BASE_PATH = '/Specs/archive'
+
+def delete_file(filename):
+    if os.path.exists(filename):
+        os.remove(filename)
+
+def convert_to_pdf(doc_filename):
+    subprocess.call(['soffice', '--headless', '--convert-to', 'pdf:writer_pdf_Export', doc_filename])
+
+    if purge:
+        delete_file(doc_filename)
+
+def unzip_spec(zip_filename):
+    with zipfile.ZipFile(zip_filename, 'r') as zip_ref:
+        zip_ref.extractall()
+        print(f"{zip_filename} extracted")
+                
+    if purge:
+        delete_file(zip_filename)
+
+    return zip_ref.namelist()
+
 
 # argument parsing
 parser = argparse.ArgumentParser(description='Downloads 3GPP specs. If no version parameter is given all versions are downloaded.')
@@ -18,7 +40,9 @@ group.add_argument('-s', '--series', type=str, help='comma separated list of num
 group.add_argument('-l', '--list', type=str, help='textfile including document list (line based) - document format e.g. 33.117')
 parser.add_argument('-v', '--major-version', type=str, help='comma separated list of numbers or characters representing 3GPP spec major version(s)')
 parser.add_argument('-e', '--extract', action="store_true", help='extracts the downloaded zip archives')
+parser.add_argument('--pdf', action="store_true", help='tries to convert doc files to pdf')
 parser.add_argument('--latest', action="store_true", help='only latest (or latest major version if given) document version is downloaded')
+parser.add_argument('--purge', action="store_true", help='delete all byproducts of result e.g. delete zip file after extracting')
 args = parser.parse_args()
 
 major_version_list = [] 
@@ -56,6 +80,8 @@ if args.major_version:
     major_version_list.extend(args.major_version.split(','))
 
 extract_after_download = args.extract
+create_pdf = args.pdf
+purge = args.purge
 latest_only = args.latest
 major_versions = len(major_version_list) != 0 
 
@@ -114,15 +140,20 @@ for series in doc_list.keys():
         for filename in to_download:
             if ".zip" not in filename:
                 continue
+            
+            zip_filename = filename
 
-            with open(filename, "wb") as fp:
-                ftp.retrbinary(f"RETR {filename}", fp.write)
-                print(f"{filename} downloaded")
+            with open(zip_filename, "wb") as fp:
+                ftp.retrbinary(f"RETR {zip_filename}", fp.write)
+                print(f"{zip_filename} downloaded")
 
             if extract_after_download:
-                with zipfile.ZipFile(filename, 'r') as zip_ref:
-                    zip_ref.extractall()
-                    print(f"{filename} extracted")
+                unzip_spec(zip_filename)
 
-                if os.path.exists(filename):
-                    os.remove(filename)
+            if create_pdf:
+                unzipped = unzip_spec(zip_filename)
+
+                for filename in unzipped:
+                    if ".doc" not in filename and ".doxc" not in filename:
+                        continue
+                    convert_to_pdf(filename)

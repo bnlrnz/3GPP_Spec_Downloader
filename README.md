@@ -1,6 +1,9 @@
 # 3GPP_Spec_Downloader
 Python script to download 3GPP specs from https://www.3gpp.org/ftp/Specs/archive
 
+### Requirements
+- for pdf conversion Libre Office must be installed
+
 ### Usage
 ```
 usage: spec_downloader.py [-h] (-d DOCUMENT | -s SERIES | -l LIST) [-v MAJOR_VERSION] [-e] [--pdf] [--latest]

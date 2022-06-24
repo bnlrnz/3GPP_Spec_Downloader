@@ -25,8 +25,9 @@ def convert_to_pdf(doc_filename):
 
 def unzip_spec(zip_filename):
     with zipfile.ZipFile(zip_filename, 'r') as zip_ref:
-        zip_ref.extractall()
-        print(f"{zip_filename} extracted")
+        for file in zip_ref.namelist():
+            if ".doc" in file:
+                zip_ref.extract(file)
                 
     if purge:
         delete_file(zip_filename)

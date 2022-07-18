@@ -3,6 +3,7 @@
 import argparse
 import sys
 import os
+import glob
 import subprocess
 import ftplib as FTP
 import zipfile
@@ -145,6 +146,10 @@ for series in doc_list.keys():
                 continue
             
             zip_filename = filename
+           
+            if glob.glob(f"{zip_filename.split('.zip')[0]}*"):
+                print(f"Artifact of {zip_filename} exists. Skipping...")
+                continue
 
             with open(zip_filename, "wb") as fp:
                 ftp.retrbinary(f"RETR {zip_filename}", fp.write)
